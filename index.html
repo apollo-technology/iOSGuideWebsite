@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<title>The iOS Guide</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="w3.css">
+<script src="parse.js"></script>
+<script src="w3data.js"></script>
+<script src="w3.js"></script>
+<style>
+@font-face {
+    font-family: 'AvenirRegular';
+    src: url('avenir-next-regular.woff');
+}
+
+@font-face {
+    font-family: 'AvenirBold';
+    src: url('avenir-next-bold.woff');
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: "AvenirRegular"
+}
+
+body {
+    font-size: 16px;
+}
+
+b {
+    font-family: "AvenirBold"
+}
+
+.appCell {
+    font-size: 32px;
+}
+</style>
+
+<body>
+    <!-- Sidenav/menu -->
+    <nav class="w3-sidenav w3-blue w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold" id="mySidenav">
+        <br>
+        <a href="javascript:void(0)" onclick="w3_close()" class="w3-padding-xlarge w3-hide-large w3-display-topleft w3-hover-white" style="width:100%;font-size:22px">Close Menu</a>
+        <div class="w3-container">
+            <h3 class="w3-padding-64"><b>The iOS<br>Guide</b></h3>
+        </div>
+        <a href="#" onclick="w3_close()" class="w3-padding w3-hover-white">Tutorials</a>
+    </nav>
+    <!-- Top menu on small screens -->
+    <header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
+        <a href="javascript:void(0)" class="w3-btn w3-red w3-border w3-border-white w3-margin-right" onclick="w3_open()">☰</a>
+        <span>Company Name</span>
+    </header>
+    <!-- Overlay effect when opening sidenav on small screens -->
+    <div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+    <div class="w3-main" style="margin-left:300px;margin-right:0px">
+        <div style="width: 100%;">
+            <ul class="w3-ul w3-border w3-hoverable w3-animate-zoom" id="table" style="width:100%;">
+                <li class="w3-padding-32 appCell" w3-repeat="apps" onclick="trackIndex(this)">{{name}}</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>
+<script>
+// Script to open and close sidenav
+Parse.initialize("iosGuide", "nil");
+Parse.serverURL = 'http://api.apollotechnology.co:1005';
+
+function w3_open() {
+    document.getElementById("mySidenav").style.display = "block";
+    document.getElementById("myOverlay").style.display = "block";
+}
+
+function w3_close() {
+    document.getElementById("mySidenav").style.display = "none";
+    document.getElementById("myOverlay").style.display = "none";
+}
+
+w3.hide('#table');
+
+var apps = [];
+var appNames = [];
+var tutorials = {};
+
+var TutorialsClass = Parse.Object.extend("tutorials");
+var query = new Parse.Query(TutorialsClass);
+query.ascending("app");
+query.ascending("title");
+query.limit(1000);
+query.find({
+    success: function(results) {
+        for (var i = 0; i < results.length; i++) {
+            var tutorial = results[i];
+            var appName = tutorial.get("app");
+            if (!appNames.includes(appName)) {
+              appNames.push(appName);
+            }
+        }
+        appNames.sort();
+        for (var i = 0; i < appNames.length; i++) {
+          var app = appNames[i];
+          apps.push({"name" : app});
+        }
+        var dataObject = {
+            "apps": apps
+        };
+        w3DisplayData("table", dataObject);
+        w3.show('#table');
+    },
+    error: function(error) {
+        alert("Error: " + error.message);
+    }
+});
+
+function trackIndex(x) {
+    var index = x.rowIndex - 1;
+    console.log(x.innerHTML);
+};
+</script>
