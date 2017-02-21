@@ -56,11 +56,27 @@ b {
         <span>The iOS Guide</span>
     </header>
     <div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+    <!-- Here is all the content -->
     <div class="w3-main" style="margin-left:300px;margin-right:0px">
-        <div style="width: 100%;">
-            <ul class="w3-ul w3-border w3-hoverable" id="table" style="width:100%;">
-                <li class="w3-padding-32 appCell" w3-repeat="apps" onclick="trackIndex(this)">{{name}}</li>
-            </ul>
+        <div class="w3-card-4">
+            <div class="w3-container w3-blue">
+                <h1 id="tutorialName">Tutorial Name</h1>
+                <h4 id="tutorialOverview">Container</h4>
+                <h4 id="tutorialDate">Container</h4>
+            </div>
+        </div>
+        <div style="margin:20px;" id="table">
+            <div class="w3-card-4" w3-repeat="sections" style="margin-top: 20px;">
+                <header class="w3-container w3-blue">
+                    <h2>{{title}}</h2>
+                </header>
+                <div class="w3-container">
+                    <p>{{content}}</p>
+                </div>
+                <footer class="w3-container w3-blue w3-hover-gray" onclick="window.open({{imageURL}})">
+                    <h5>View Image</h5>
+                </footer>
+            </div>
         </div>
     </div>
 </body>
@@ -80,41 +96,21 @@ function getURIParameter(param, asArray) {
         return asArray ? p.concat(parts.concat(true)[1]) : parts.concat(true)[1];
     }, []);
 }
-var app = getURIParameter("name");
-var ids = {};
-
-var tutorials = [];
 
 var TutorialsClass = Parse.Object.extend("tutorials");
 var query = new Parse.Query(TutorialsClass);
-query.equalTo("app", app);
-query.find({
-    success: function(results) {
-        for (var i = 0; i < results.length; i++) {
-            var tutorial = results[i];
-            var tutorialName = tutorial.get("title");
-            ids[tutorialName] = tutorial.id;
-            tutorials.push({
-                "name": tutorialName
-            });
-        }
-        var dataObject = {
-            "apps": tutorials
-        };
-        w3DisplayData("table", dataObject);
-        w3.show('#table');
+var objectIdToShow = getURIParameter("id");
+query.get(objectIdToShow, {
+    success: function(object) {
+        document.getElementById("tutorialName").innerHTML = object.get("title");
+        document.getElementById("tutorialOverview").innerHTML = object.get("overview");
+        var date = object.updatedAt;
+        var name = date.toDateString();
+        document.getElementById("tutorialDate").innerHTML = "Created by " + object.get("author") + " on " + name + ".";
+        w3DisplayData("table", {"sections" : object.get("sections")});
     },
-    error: function(error) {
-        alert("Error: " + error.message);
+    error: function(object, error) {
+
     }
 });
-
-function trackIndex(x) {
-    var name = x.innerHTML;
-    openTutorial(ids[name]);
-};
-
-function openTutorial(id){
-    window.open("tutorial.html?id="+id,"_self");
-}
 </script>
